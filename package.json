@@ -1,0 +1,23 @@
+{
+  "name": "aave-liquidity",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.7.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.418.0",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.7.1",
+    "zod": "^3.23.8"
+  }
+}
