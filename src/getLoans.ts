@@ -93,7 +93,7 @@ export default async function getLoansToLiquidate(lambdaWallet: Signer) {
 
     if (healthFactor < 1000000000000000000n) {
       // healthFactor < 1.0
-      const currentDebt = userData.totalDebtETH;
+      const currentDebt = userData.totalDebtBase;
 
       const userReserves = await getUserReservesData(user, lambdaWallet);
 
