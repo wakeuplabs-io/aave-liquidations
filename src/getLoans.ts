@@ -2,6 +2,8 @@ import poolMetadata from "./abis/Pool-Implementation.json" assert { type: "json"
 import { Contract, Signer, EventLog } from "ethers";
 import dataProviderMetadata from "./abis/PoolDataProvider-Polygon.json" assert { type: "json" };
 import envParsed from "./envParsed.js";
+import { convertDecimals } from "./utils.js";
+import { ASSETS_DECIMALS, BASE_UNIT_DECIMALS } from "./constants.js";
 
 async function getUsersFromEvents(lambdaWallet: Signer) {
   const pool = new Contract(
@@ -66,7 +68,6 @@ async function getUserReservesData(user: string, lambdaWallet: Signer) {
 
     if (hasDebt) {
       userReservesData.push({
-        currentATokenBalance,
         reserveToken: reserve.tokenAddress,
         debtAsset: reserve.tokenAddress,
       });
@@ -102,20 +103,26 @@ export default async function getLoansToLiquidate(lambdaWallet: Signer) {
     const userData = await pool.getUserAccountData(user);
     const healthFactor = BigInt(userData.healthFactor);
 
+    // healthFactor < 1.0
     if (healthFactor < 1000000000000000000n) {
-      // healthFactor < 1.0
-      const currentDebt = userData.totalDebtBase * BigInt(10 ** 10);
-
       const userReserves = await getUserReservesData(user, lambdaWallet);
 
       userReserves.forEach((reserve) => {
+        const debtAssetDecimals = ASSETS_DECIMALS[reserve.debtAsset];
+        // total debt of the user, in market’s base currency
+        const currentDebt = convertDecimals(
+          userData.totalDebtBase,
+          BASE_UNIT_DECIMALS,
+          debtAssetDecimals
+        );
+
         if (reserve.collateralAsset && reserve.debtAsset) {
           loansToLiquidate.push({
             currentDebt,
             collateralAsset: reserve.collateralAsset,
             debtAsset: reserve.debtAsset,
             borrowerUser: user,
-            receiveAToken: false, // Based on liquidation logic
+            receiveAToken: false, // if true, the user receives the aTokens equivalent of the purchased collateral. If false, the user receives the underlying asset directly.
           });
         }
       });
