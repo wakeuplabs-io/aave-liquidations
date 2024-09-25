@@ -74,6 +74,7 @@ async function getUserReservesData(user: string, lambdaWallet: Signer) {
     }
   }
 
+  // The collateral asset must be updated here to avoid nullable values for some assets
   return userReservesData.map((item) => ({
     ...item,
     collateralAsset,
