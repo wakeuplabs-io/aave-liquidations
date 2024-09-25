@@ -1,7 +1,7 @@
 import { Contract, Signer } from "ethers";
 import erc20Abi from "./abis/ERC20_Abi.json" assert { type: "json" };
 import poolMetadata from "./abis/Pool-Implementation.json" assert { type: "json" };
-import envParsed from "./envParsed";
+import envParsed from "./envParsed.js";
 
 const TX_SUCCESS = 1;
 

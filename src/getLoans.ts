@@ -1,7 +1,7 @@
 import poolMetadata from "./abis/Pool-Implementation.json" assert { type: "json" };
 import { Contract, Signer, EventLog } from "ethers";
 import dataProviderMetadata from "./abis/PoolDataProvider-Polygon.json" assert { type: "json" };
-import envParsed from "./envParsed";
+import envParsed from "./envParsed.js";
 
 async function getUsersFromEvents(lambdaWallet: Signer) {
   const pool = new Contract(
@@ -39,33 +39,44 @@ async function getUserReservesData(user: string, lambdaWallet: Signer) {
 
   const reservesList = await poolDataProviderContract.getAllReservesTokens(); // Get all reserve tokens
   const userReservesData = [];
+  let collateralAsset = null;
 
   for (const reserve of reservesList) {
     const userReserveData = await poolDataProviderContract.getUserReserveData(
       reserve.tokenAddress,
       user
     );
-    const { currentATokenBalance, currentStableDebt, currentVariableDebt } =
-      userReserveData;
+    const [
+      currentATokenBalance,
+      currentStableDebt,
+      currentVariableDebt,
+      ,
+      ,
+      ,
+      ,
+      ,
+      isCollateral,
+    ] = userReserveData;
 
-    if (
-      currentATokenBalance > BigInt(0) ||
-      currentStableDebt > BigInt(0) ||
-      currentVariableDebt > BigInt(0)
-    ) {
+    if (isCollateral) {
+      collateralAsset = reserve.tokenAddress;
+    }
+    const hasDebt =
+      currentStableDebt > BigInt(0) || currentVariableDebt > BigInt(0);
+
+    if (hasDebt) {
       userReservesData.push({
+        currentATokenBalance,
         reserveToken: reserve.tokenAddress,
-        collateralAsset:
-          currentATokenBalance > BigInt(0) ? reserve.tokenAddress : null,
-        debtAsset:
-          currentStableDebt > BigInt(0) || currentVariableDebt > BigInt(0)
-            ? reserve.tokenAddress
-            : null,
+        debtAsset: reserve.tokenAddress,
       });
     }
   }
 
-  return userReservesData;
+  return userReservesData.map((item) => ({
+    ...item,
+    collateralAsset,
+  }));
 }
 
 type LoanToLiquidate = {
@@ -93,7 +104,7 @@ export default async function getLoansToLiquidate(lambdaWallet: Signer) {
 
     if (healthFactor < 1000000000000000000n) {
       // healthFactor < 1.0
-      const currentDebt = userData.totalDebtBase;
+      const currentDebt = userData.totalDebtBase * BigInt(10 ** 10);
 
       const userReserves = await getUserReservesData(user, lambdaWallet);
 
