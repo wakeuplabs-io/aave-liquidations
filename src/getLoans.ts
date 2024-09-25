@@ -49,7 +49,7 @@ async function getUserReservesData(user: string, lambdaWallet: Signer) {
       user
     );
     const [
-      currentATokenBalance,
+      _currentATokenBalance,
       currentStableDebt,
       currentVariableDebt,
       ,
@@ -70,6 +70,7 @@ async function getUserReservesData(user: string, lambdaWallet: Signer) {
       userReservesData.push({
         reserveToken: reserve.tokenAddress,
         debtAsset: reserve.tokenAddress,
+        currentDebt: BigInt(currentStableDebt) + BigInt(currentVariableDebt),
       });
     }
   }
@@ -105,21 +106,13 @@ export default async function getLoansToLiquidate(lambdaWallet: Signer) {
     const healthFactor = BigInt(userData.healthFactor);
 
     // healthFactor < 1.0
-    if (healthFactor < 1000000000000000000n) {
+    if (healthFactor < convertDecimals(1n, 0, 18)) {
       const userReserves = await getUserReservesData(user, lambdaWallet);
 
       userReserves.forEach((reserve) => {
-        const debtAssetDecimals = ASSETS_DECIMALS[reserve.debtAsset];
-        // total debt of the user, in market’s base currency
-        const currentDebt = convertDecimals(
-          userData.totalDebtBase,
-          BASE_UNIT_DECIMALS,
-          debtAssetDecimals
-        );
-
         if (reserve.collateralAsset && reserve.debtAsset) {
           loansToLiquidate.push({
-            currentDebt,
+            currentDebt: reserve.currentDebt,
             collateralAsset: reserve.collateralAsset,
             debtAsset: reserve.debtAsset,
             borrowerUser: user,
