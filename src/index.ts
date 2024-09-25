@@ -28,6 +28,7 @@ async function execute() {
   while (1 === 1) {
     try {
       const loansToLiquidate = await getLoansToLiquidate(lambdaWallet);
+      console.log("Loans to liquidate: ", loansToLiquidate.length);
 
       for (let index = 0; index < loansToLiquidate.length; index++) {
         const loan = loansToLiquidate[index];
@@ -69,7 +70,7 @@ async function execute() {
               collateralAsset: loan.collateralAsset,
               debtAsset: loan.debtAsset,
               borrowerUser: loan.borrowerUser,
-              receiveAToken: loan.receiveAToken,
+              receiveAToken: false,
             },
             lambdaWallet
           );
