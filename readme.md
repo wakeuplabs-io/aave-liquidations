@@ -11,7 +11,7 @@ At the first time you should follow this steps:
 > 3. cp -R node_modules /dist
 > 4. Complete env file with your private key
 > 5. copy .env.sample to .env
-> 6. npm run start
+> 6. npm run dev
 
 ## Precondition
 
