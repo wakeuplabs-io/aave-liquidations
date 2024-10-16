@@ -59,7 +59,6 @@ async function getUserReservesData(user: string, lambdaWallet: Signer) {
       isCollateral,
     ] = userReserveData;
 
-    console.log(reserve.tokenAddress, isCollateral);
     if (isCollateral) {
       collateralAsset = reserve.tokenAddress;
     }
@@ -75,7 +74,6 @@ async function getUserReservesData(user: string, lambdaWallet: Signer) {
     }
   }
 
-  console.log({ collateralAsset });
   // The collateral asset must be updated here to avoid nullable values for some assets
   return userReservesData.map((item) => ({
     ...item,
