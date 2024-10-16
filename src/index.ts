@@ -7,6 +7,7 @@ import {
   checkAllowance,
 } from "./liquidationCall.js";
 import getLoansToLiquidate from "./getLoans.js";
+import { getAssetPrice } from "./oracle.js";
 
 dotenv.config();
 
@@ -34,6 +35,29 @@ async function execute() {
         const loan = loansToLiquidate[index];
 
         console.log("Loan: ", loan);
+
+        // Check prices
+        const collateralAssetPrice = await getAssetPrice(
+          provider,
+          loan.collateralAsset
+        );
+        if (collateralAssetPrice === 0n) {
+          console.error(
+            "Collateral price is 0, skipping liquidation call for asset: ",
+            loan.collateralAsset
+          );
+          continue;
+        }
+
+        const debtAssetPrice = await getAssetPrice(provider, loan.debtAsset);
+
+        if (debtAssetPrice === 0n) {
+          console.error(
+            "Debt Asset price is 0, skipping liquidation call for asset: ",
+            loan.collateralAsset
+          );
+          continue;
+        }
 
         try {
           const { approved } = await checkAllowance(

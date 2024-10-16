@@ -3,7 +3,6 @@ import { Contract, Signer, EventLog } from "ethers";
 import dataProviderMetadata from "./abis/PoolDataProvider-Polygon.json" assert { type: "json" };
 import envParsed from "./envParsed.js";
 import { convertDecimals } from "./utils.js";
-import { ASSETS_DECIMALS, BASE_UNIT_DECIMALS } from "./constants.js";
 
 async function getUsersFromEvents(lambdaWallet: Signer) {
   const pool = new Contract(
