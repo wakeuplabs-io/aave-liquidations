@@ -14,6 +14,7 @@ const env = {
   POOL_ADDRESS: process.env.POOL_ADDRESS,
   POOL_DATA_PROVIDER_ADDRESS: process.env.POOL_DATA_PROVIDER_ADDRESS,
   RPC_URL: process.env.RPC_URL,
+  AAVE_ORACLE_ADDRESS: process.env.AAVE_ORACLE_ADDRESS,
 };
 
 const envSchema = z
@@ -26,6 +27,10 @@ const envSchema = z
       .min(1)
       .refine((arg) => isAddress(arg)),
     POOL_DATA_PROVIDER_ADDRESS: z
+      .string()
+      .min(1)
+      .refine((arg) => isAddress(arg)),
+    AAVE_ORACLE_ADDRESS: z
       .string()
       .min(1)
       .refine((arg) => isAddress(arg)),

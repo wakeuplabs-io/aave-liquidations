@@ -3,7 +3,6 @@ import { Contract, Signer, EventLog } from "ethers";
 import dataProviderMetadata from "./abis/PoolDataProvider-Polygon.json" assert { type: "json" };
 import envParsed from "./envParsed.js";
 import { convertDecimals } from "./utils.js";
-import { ASSETS_DECIMALS, BASE_UNIT_DECIMALS } from "./constants.js";
 
 async function getUsersFromEvents(lambdaWallet: Signer) {
   const pool = new Contract(
@@ -60,6 +59,7 @@ async function getUserReservesData(user: string, lambdaWallet: Signer) {
       isCollateral,
     ] = userReserveData;
 
+    console.log(reserve.tokenAddress, isCollateral);
     if (isCollateral) {
       collateralAsset = reserve.tokenAddress;
     }
@@ -75,6 +75,7 @@ async function getUserReservesData(user: string, lambdaWallet: Signer) {
     }
   }
 
+  console.log({ collateralAsset });
   // The collateral asset must be updated here to avoid nullable values for some assets
   return userReservesData.map((item) => ({
     ...item,
